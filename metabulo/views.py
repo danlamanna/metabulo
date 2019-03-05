@@ -3,10 +3,19 @@ from io import BytesIO
 from flask import Blueprint, current_app, jsonify, request, Response, send_file
 
 from metabulo import opencpu
-from metabulo.models import CSVFile, CSVFileSchema, db, \
-    ModifyColumnSchema, ModifyRowSchema, \
-    TableColumn, TableColumnSchema, TableRow, TableRowSchema, \
-    TableTransform, TableTransformSchema
+from metabulo.models import (
+    CSVFile,
+    CSVFileSchema,
+    db,
+    ModifyColumnSchema,
+    ModifyRowSchema,
+    TableColumn,
+    TableColumnSchema,
+    TableRow,
+    TableRowSchema,
+    TableTransform,
+    TableTransformSchema,
+)
 from metabulo.plot import make_box_plot
 
 csv_file_schema = CSVFileSchema()
@@ -30,10 +39,7 @@ def upload_csv_file():
 
     csv_file = None
     try:
-        csv_file = csv_file_schema.load({
-            'name': file.filename,
-            'table': file.read().decode()
-        })
+        csv_file = csv_file_schema.load({'name': file.filename, 'table': file.read().decode()})
 
         db.session.add(csv_file)
         db.session.commit()
@@ -100,17 +106,14 @@ def delete_csv_file(csv_id):
 @csv_bp.route('/csv/<uuid:csv_id>/column', methods=['GET'])
 def list_columns(csv_id):
     CSVFile.query.get_or_404(csv_id)  # ensure the file exists
-    return jsonify(table_column_schema.dump(
-        TableColumn.query.filter_by(csv_file_id=csv_id),
-        many=True
-    ))
+    return jsonify(
+        table_column_schema.dump(TableColumn.query.filter_by(csv_file_id=csv_id), many=True)
+    )
 
 
 @csv_bp.route('/csv/<uuid:csv_id>/column/<int:column_index>', methods=['GET'])
 def get_column(csv_id, column_index):
-    return jsonify(table_column_schema.dump(
-        TableColumn.query.get_or_404((csv_id, column_index))
-    ))
+    return jsonify(table_column_schema.dump(TableColumn.query.get_or_404((csv_id, column_index))))
 
 
 @csv_bp.route('/csv/<uuid:csv_id>/column/<int:column_index>', methods=['PUT'])
@@ -127,17 +130,12 @@ def modify_column(csv_id, column_index):
 @csv_bp.route('/csv/<uuid:csv_id>/row', methods=['GET'])
 def list_rows(csv_id):
     CSVFile.query.get_or_404(csv_id)  # ensure the file exists
-    return jsonify(table_row_schema.dump(
-        TableRow.query.filter_by(csv_file_id=csv_id),
-        many=True
-    ))
+    return jsonify(table_row_schema.dump(TableRow.query.filter_by(csv_file_id=csv_id), many=True))
 
 
 @csv_bp.route('/csv/<uuid:csv_id>/row/<int:row_index>', methods=['GET'])
 def get_row(csv_id, row_index):
-    return jsonify(table_row_schema.dump(
-        TableRow.query.get_or_404((csv_id, row_index))
-    ))
+    return jsonify(table_row_schema.dump(TableRow.query.get_or_404((csv_id, row_index))))
 
 
 @csv_bp.route('/csv/<uuid:csv_id>/row/<int:row_index>', methods=['PUT'])
